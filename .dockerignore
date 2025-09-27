@@ -1,0 +1,9 @@
+# Bỏ qua các file không cần thiết khi build Docker image
+build/
+src/
+.git/
+.gitignore
+*.md
+*.txt
+build.xml
+WebContent/

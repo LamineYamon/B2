@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="EmailListApp" default="deploy" basedir=".">
+    
+    <!-- Định nghĩa các thuộc tính -->
+    <property name="src.dir" location="src"/>
+    <property name="web.dir" location="WebContent"/>
+    <property name="build.dir" location="build"/>
+    <property name="classes.dir" location="${build.dir}/classes"/>
+    <property name="war.dir" location="${build.dir}/war"/>
+    
+    <!-- Đường dẫn đến các thư viện -->
+    <property name="jstl.jar" location="D:\Code\Năm 3\ltw\B2-main\WebContent\WEB-INF\lib\jstl-1.2.jar"/>
+    <property name="servlet.jar" location="D:\Code\Năm 3\ltw\apache-tomcat-9.0.108\lib\servlet-api.jar"/>
+    
+    <!-- Đường dẫn deploy - tạo file WAR trực tiếp vào webapps -->
+    <property name="tomcat.webapps" location="D:\Code\Năm 3\ltw\apache-tomcat-9.0.108\webapps"/>
+    <property name="war.file" location="${tomcat.webapps}/EmailListApp.war"/>
+    
+    <!-- File WAR cho Docker build -->
+    <property name="docker.war.file" location="EmailListApp.war"/>
+    
+    <!-- Định nghĩa classpath -->
+    <path id="compile.classpath">
+        <pathelement location="${jstl.jar}"/>
+        <pathelement location="${servlet.jar}"/>
+    </path>
+    
+    <!-- Target: Clean -->
+    <target name="clean" description="Xóa thư mục build">
+        <delete dir="${build.dir}"/>
+    </target>
+    
+    <!-- Target: Init -->
+    <target name="init" depends="clean" description="Tạo thư mục build">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${war.dir}"/>
+    </target>
+    
+    <!-- Target: Compile -->
+    <target name="compile" depends="init" description="Biên dịch source code">
+        <javac srcdir="${src.dir}" 
+               destdir="${classes.dir}"
+               classpathref="compile.classpath"
+               debug="true"
+               includeantruntime="false"
+               encoding="UTF-8">
+        </javac>
+        <echo message="Biên dịch hoàn thành!"/>
+    </target>
+    
+    <!-- Target: War -->
+    <target name="war" depends="compile" description="Tạo file WAR">
+        <!-- Copy web content -->
+        <copy todir="${war.dir}">
+            <fileset dir="${web.dir}"/>
+        </copy>
+        
+        <!-- Copy compiled classes -->
+        <copy todir="${war.dir}/WEB-INF/classes">
+            <fileset dir="${classes.dir}"/>
+        </copy>
+        
+        <!-- Tạo file WAR -->
+        <jar destfile="${war.file}" basedir="${war.dir}"/>
+        <echo message="Tạo file WAR thành công: ${war.file}"/>
+    </target>
+    
+    <!-- Target: Deploy -->
+    <target name="deploy" depends="war" description="WAR file đã được tạo trực tiếp vào Tomcat webapps">
+        <echo message="WAR file đã được tạo trực tiếp tại: ${war.file}"/>
+        <echo message="Khởi động lại Tomcat để deploy ứng dụng!"/>
+    </target>
+    
+    <!-- Target: Undeploy -->
+    <target name="undeploy" description="Gỡ bỏ ứng dụng khỏi Tomcat">
+        <delete file="${war.file}"/>
+        <delete dir="${tomcat.webapps}/EmailListApp"/>
+        <echo message="Undeploy hoàn thành!"/>
+    </target>
+    
+    <!-- Target: Redeploy -->
+    <target name="redeploy" depends="undeploy,deploy" description="Redeploy ứng dụng">
+        <echo message="Redeploy hoàn thành!"/>
+    </target>
+    
+    <!-- Target: Docker build -->
+    <target name="docker-build" depends="compile" description="Tạo WAR file cho Docker">
+        <!-- Copy web content -->
+        <copy todir="${war.dir}">
+            <fileset dir="${web.dir}"/>
+        </copy>
+        
+        <!-- Copy compiled classes -->
+        <copy todir="${war.dir}/WEB-INF/classes">
+            <fileset dir="${classes.dir}"/>
+        </copy>
+        
+        <!-- Tạo file WAR cho Docker -->
+        <jar destfile="${docker.war.file}" basedir="${war.dir}"/>
+        <echo message="Tạo WAR file cho Docker thành công: ${docker.war.file}"/>
+    </target>
+    
+    <!-- Target: Help -->
+    <target name="help" description="Hiển thị trợ giúp">
+        <echo message="Các target có sẵn:"/>
+        <echo message="  clean    - Xóa thư mục build"/>
+        <echo message="  init     - Khởi tạo thư mục build"/>
+        <echo message="  compile  - Biên dịch source code"/>
+        <echo message="  war      - Tạo file WAR"/>
+        <echo message="  deploy   - Deploy WAR vào Tomcat"/>
+        <echo message="  undeploy - Gỡ bỏ ứng dụng khỏi Tomcat"/>
+        <echo message="  redeploy - Undeploy và deploy lại"/>
+    </target>
+
+</project>
