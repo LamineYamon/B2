@@ -4,11 +4,15 @@ FROM tomcat:9.0-jdk17
 # Xóa các webapp mặc định (docs, examples,...)
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy file WAR đã build vào Tomcat và đổi thành ROOT.war
+# Copy startup script và WAR file
+COPY start.sh /start.sh
 COPY EmailListApp.war /usr/local/tomcat/webapps/ROOT.war
 
-# Expose cổng 8080 (Render sẽ tự map cổng này)
+# Make script executable
+RUN chmod +x /start.sh
+
+# Expose cổng mặc định (Render sẽ override với PORT env var)
 EXPOSE 8080
 
-# Chạy Tomcat
-CMD ["catalina.sh", "run"]
+# Chạy startup script
+CMD ["/start.sh"]
